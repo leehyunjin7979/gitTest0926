@@ -1,0 +1,36 @@
+
+-----------------------------------------------------------------------
+--컨트롤에서 호출한다.
+
+--1.reqParam 에서 parameter를 넘긴다.
+HashMap<String, String> reqParam = new HashMap<String, String>();
+
+--2. 서비스 호출한다.
+List<List<DataMap>> customerInfoDetail = bdtsCustomerService.getBdtsCustInfoDetail(reqParam);
+
+--3.model 에 담는다.
+model.addAttribute("tb_gb", strGb.toLowerCase());
+model.addAttribute("lang", strReqLangCd);
+model.addAttribute("cd", customerInfoDetail.get(0));
+model.addAttribute("is", JSONValue.toJSONString(customerInfoDetail.get(1)));
+model.addAttribute("as", JSONValue.toJSONString(customerInfoDetail.get(2)));
+model.addAttribute("cs", JSONValue.toJSONString(customerInfoDetail.get(3)));
+
+
+--4.string 으로 url를 넘긴다. 
+String targetUrl = "gsis/extra/bdts/customer/customerDetailInfo";
+
+
+--5.xml query
+
+<resultMap id="customerInfo" type="dataMap" />
+
+<select id="getBdtsCustInfoDetail" statementType="CALLABLE" parameterType="HashMap" resultMap="customerInfo, customerInfo, customerInfo, customerInfo">
+		{
+			call dbo.USP_BDTS_CUST_CUST_INFO_DETAIL(
+				#{lang_cd},
+				#{erp_cd}
+			)
+		}  
+	</select>
+-----------------------------------------------------------------------

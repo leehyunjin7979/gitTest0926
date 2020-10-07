@@ -1,0 +1,107 @@
+---------------------------------------------
+setPopup: function() {
+
+		$("#popup_quick_search").kendoPopup({
+			origin : "top center",
+			animation : false,
+			appendTo : $(".page-content .page-bar")
+		});
+
+		//녹취파일 등 팝업
+		$("#dialog_sound_file").kendoWindow({
+			height : 300,
+			width : 500,
+			modal : true,
+			visible : false,
+			title : $.gsisMsg("customer.js.common.028"),//"녹취파일"
+			animation : {
+				close : false,
+				open : false
+			}
+		});
+		function dialog_sound_file_open() {
+			$("#dialog_sound_file").data("kendoWindow").center().open();
+		}
+	},
+
+
+<!-- 녹취파일 등록팝업 -->
+<%@ include
+	file="/WEB-INF/jsp/gsis/customer/tick/popup/RegRecordFile.jsp"%>
+
+
+
+<div id="dialog_sound_file" style="display: none;">
+
+---------------------------------------------	
+콤보박스 
+
+input_rcptClsCd : $("#searchForm input[name=rcptClsCd]"), // 상담구분
+
+
+customerRecepitList._searchFormValues.rcptClsCd = (function() {
+				if(customerRecepitList._ids.views.input_rcptClsCd.val().trim() == "ALL") {
+					return null;
+				} else {
+					return customerRecepitList._ids.views.input_rcptClsCd.val().trim();
+				}
+			})();
+			
+			
+// 접수유형
+		customerRecepitList._ids.views.input_rcptClsCd.kendoComboBox({
+			dataTextField: "codeNm",
+			dataValueField: "codeId",
+			dataSource: new kendo.data.DataSource({
+				transport : {
+					read : {
+						url : customerRecepitList._CODE_URL.rcptClsCd,
+						dataType : "json",
+						sendDataType : "string",
+						type : "POST",
+						error : function() {
+							failAlert("Ajax Error...");
+						}
+					},
+					// parameterMap : _parameterMap,
+				},
+				schema : {
+					data : "comCodeList",
+					parse: function(data) {
+						data.comCodeList.unshift({ "codeNm" : $.gsisMsg("customer.js.common.143"), "codeId" : "ALL" });// "전체"
+						return data;
+					}
+				},
+			}),
+			index: 0,
+		});
+
+
+$.each(implServiceTicket.rV.o.input_rcptClsCd.data("kendoComboBox").dataSource.data(), function(index, value) {
+								value.value == "EG"
+									&& implServiceTicket.rV.o.input_rcptClsCd.data("kendoComboBox").select(index)
+									&& implServiceTicket.rV.o.input_rcptClsCd.data("kendoComboBox").enable(false);
+							});		
+
+--------------------------------------------------------------------
+
+$("#popup_quick_search").kendoPopup({
+	origin : "top center",
+	animation : false,
+	appendTo : $(".page-content .page-bar")
+});
+
+var $pop_quick_search = $("#popup_quick_search").data("kendoPopup");
+$("#ip_search").focusin(function() {
+	$pop_quick_search.open();
+});
+
+$("#popup_quick_search .btn_pop_close").click(function() {
+	$pop_quick_search.close();
+});
+
+
+
+
+
+
