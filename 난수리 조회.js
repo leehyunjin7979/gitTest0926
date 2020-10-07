@@ -1,4 +1,4 @@
-git push -u origin master
+	git push -u origin master
 
 //HQ엔지니어
 	public static final String AUTH_HQ = "HQ";	
