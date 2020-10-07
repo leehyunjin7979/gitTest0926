@@ -1,4 +1,6 @@
-	//HQ엔지니어
+git push -u origin master
+
+//HQ엔지니어
 	public static final String AUTH_HQ = "HQ";	
 	//HQ하위의 법인 또는 파트너 엔지니어
 	public static final String AUTH_TP = "TP";	
@@ -287,12 +289,13 @@ value(필수): JSON 문자열로 변환할 값이다.(배열, 객체, 또는 숫
 Stringify a JavaScript Object
 var obj = { name: "John", age: 30, city: "New York" };
 var myJSON = JSON.stringify(obj);
+{"name":"John","age":30,"city":"New York"}
 
 2-2)
 Stringify a JavaScript Array
 var arr = [ "John", "Peter", "Sally", "Jane" ];
 var myJSON = JSON.stringify(arr);
-:: ["John","Peter","Sally","Jane"]
+["John","Peter","Sally","Jane"]
 
 
 3.제이쿼리, find() 함수 사용법! children() 함수와의 차이점
