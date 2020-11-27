@@ -1,0 +1,387 @@
+/////////////git basic /////////////
+/////////////git basic /////////////
+alias.ll=log --pretty=format:%C(yellow)%h%Cred%d\ %Creset%s%Cblue\ [%cn] --decorate --numstat
+alias.ld=log --pretty=format:%C(yellow)%h\ %C(green)%ad%Cred%d\ %Creset%s%Cblue\ [%cn] --decorate --date=short --graph
+alias.ls=log --pretty=format:%C(green)%h\ %C(yellow)[%ad]%Cred%d\ %Creset%s%Cblue\ [%cn] --decorate --date=relative --graph
+alias.lg=log --graph --abbrev-commit --decorate --format=format:'%Cred%h%C(reset) - %C(green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(yellow)%d%C(reset)'
+alias.lgg=log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+alias.lg1=log --graph --abbrev-commit --decorate --format=format:'%C(red)%h%C(reset) - %C(green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %C(yellow)<%an>%C(reset)%C(yellow)%d%C(reset)' --all
+
+
+
+/////////////-- setting 
+git config --list
+git config --global merge.tool.vimdiff x 
+git config --global merge.tool kdiff3  o 
+
+
+git config user.name "lhj"
+git config user.email kungfupanda@kakao.com
+
+
+/////////////-- 도움말 보기
+git help config
+git help branch
+
+
+/////////////-- 저장소 만들기
+git init
+
+git add *
+or
+git add README
+
+git stauts
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .classpath
+        .cvsignore
+        .externalToolBuilders/
+        .fatjar
+        .gitignore
+        .metadata/
+        .project
+        .settings/
+        .svn/
+
+git commit -m 'initial project version'
+
+/////////////-- log 
+git log --branches --decorate --graph
+
+git log master..exp -> master없고, exp에 있는것
+git log -p master..exp 
+
+
+/////////////-- diff
+git diff                -> 
+git diff --cached       -> staged 상태의 비교
+git diff master..exp    -> unstaged 상태의 변경사항비교
+
+
+
+git add -> 파일에 대해 신규파일을 tracked 하기위함.  ->status -> for commit new file
+           또는     기존 파일을 staged 하기 위함.  ->status -> for commit modified
+
+Untracked files:  ->신규파일을 의미 
+Changes not staged for commit:->수정파일을 의미
+$ git add 1.txt->$ git status=>  Changes to be committed:
+
+
+
+
+-----------------------------------------------------
+
+1.협업했을때는 절대로 reset 하면 안된다.
+공유하기 이전의 버전에 대해서만 reset 한다.
+
+2. git reset xxxx --hard
+
+3. revert 은 커밋을 취소하면서 새로운 버전을 만들어 주는것이다.
+
+-----------------------------------------------------
+
+기본개념을 통해서 큰 흐름을 보고 그 이후부터는 알아가는 능력을 키우도록 한다.
+
+git commit --help
+git commit -am "add and msg"
+
+-------- 14. 원리를 알아야 기억이 오래간다.
+
+
+
+17. add 의 원리
+git add 하면 sha1통과해서 objects 파일을 만든다.
+그리고 index라는 파일에 object , 파일명을 저장한다.
+
+파일의 이름, object 이름 은 index에 담겨 있고,
+파일의 내용은 object 에 있다.
+
+git 은 파일의 이름이 달라도 내용이 같으면 같은 object를 가리킨다.
+index
+78xxxxxx f1.txt
+bsssfdf f2.txt
+78xxxxxx f3.txt
+
+
+18. commit 원리
+commit 하면
+1. object 파일이 만들어지고
+commit 에 대한 object 만들어지고 그안에는 tree 정보(object)가 저장됨.
+tree정보에는 commit 된 최종 스냅샷이 저장
+object name file명
+
+
+-----------------------
+git book
+-----------------------
+1. 깃 환경설정
+git config --global user.name "lhj"
+git config --global user.email "xx@c.com"
+
+2.dir 만들기
+mkdir test
+rm -r test
+
+3.버전만들기
+스테이지 내용은 .git/index, 저장소 내용은 .git/HEAD 에 저장됨
+
+4.커밋내용 확인
+git log or git log --stat
+
+-> 다른 브랜치와 같이 나오는가?
+-> q , enter
+
+5.변경내용 확인
+git diff
+git diff --cached
+
+6.tracked and untracked
+
+7. git status ( git status -s )
+unmodified -> working tree clean
+modified -> changes not stage for commit
+staged ->changes to be committed
+
+8. 되돌리기
+git checkout -- hello.txt
+=> git restore hello.txt
+
+9.스테이징 되돌리기(unstaged)
+git reset HEAD hello.txt
+=>git restore --staged hello.txt
+
+파일수정후 add, 그후 다시 modify,
+add된것을 unstaged 하면 working dir 에서는 modify된 것만 있다.
+add 된 파일이 내려오지 않는다.
+
+
+10.최신커밋 되돌리기
+git reset HEAD^           
+git reset HEAD~3
+git reset HEAD hashId
+
+git reset --hard HEAD^, --mixed, --soft
+
+11.커밋 삭제하지 않고 되돌리기
+git revert 취소하려고하는 버전
+r1->r2->r5 에서 git revert r5하면 커밋취소가 된다.
+
+
+-----------------------------------------------------
+
+------------------------------
+branch , log
+------------------------------
+master, 1,1,1
+google, 1,1,working
+
+1. git log
+git lg
+git lg --all
+git lg --all --stat
+
+git log --oneline --branches
+git log --oneline --branches --stat
+git log --oneline --branches --graph
+
+git log master..google
+git log master..google --stat
+
+
+2.git diff master..apple
+git diff master..apple --stat
+
+
+
+----------------------
+hyunj@DESKTOP-INT5AC6 MINGW64 ~/gitTest3 (google)
+$ git diff master..google
+diff --git a/1.txt b/1.txt
+index 3409a36..2788e5b 100644
+--- a/1.txt
++++ b/1.txt
+@@ -1,3 +1,2 @@
+work1
+work2
+-work3
+diff --git a/work.txt b/work.txt
+new file mode 100644
+index 0000000..98b22ba
+--- /dev/null
++++ b/work.txt
+@@ -0,0 +1,2 @@
++google work1
++google work2
+
+hyunj@DESKTOP-INT5AC6 MINGW64 ~/gitTest3 (google)
+$ git diff master..google --stat
+1.txt | 1 -
+work.txt | 2 ++
+2 files changed, 2 insertions(+), 1 deletion(-)
+
+-----------------------------
+hyunj@DESKTOP-INT5AC6 MINGW64 ~/gitTest3 (google)
+$ git log master..google
+commit 9d2d1ffefa0bfd916a27596bfb67cd1237482e5c (HEAD -> google)
+Author: lhj <kungfupanda@kakao.com>
+Date: Sat Jan 4 15:13:14 2020 +0900
+
+google work2
+
+commit b1877d86ab33fabdca9994f734635d57dfe4ff54
+Author: lhj <kungfupanda@kakao.com>
+Date: Sat Jan 4 14:33:50 2020 +0900
+
+google work
+
+hyunj@DESKTOP-INT5AC6 MINGW64 ~/gitTest3 (google)
+$ git log master..google --stat
+commit 9d2d1ffefa0bfd916a27596bfb67cd1237482e5c (HEAD -> google)
+Author: lhj <kungfupanda@kakao.com>
+Date: Sat Jan 4 15:13:14 2020 +0900
+
+google work2
+
+work.txt | 1 +
+1 file changed, 1 insertion(+)
+
+commit b1877d86ab33fabdca9994f734635d57dfe4ff54
+Author: lhj <kungfupanda@kakao.com>
+Date: Sat Jan 4 14:33:50 2020 +0900
+
+google work
+
+work.txt | 1 +
+1 file changed, 1 insertion(+)
+
+-----------------------------
+3.merge
+-----------------------------
+git checkout master
+git merge google
+--------------------------------
+1)같은문서의 다른 위치를 수정했을때의 병합하기
+
+2)같은문서의 같은 위치를 수정했을때의 병합하기
+
+--merge 취소하기
+git merge --abort
+
+--3way merge
+1.git mergetool 방식으로 수정한다.
+2.
+a <master>
+| \ 
+b  c <head hotfix>
+일때 git merge master 하면 fast-forward 방식으로 같은 위치에 서게된다.
+
+3.comflict 가 난 상태에서 
+git diff --ours
+git diff --theirs -b
+git diff --base -b 
+
+
+
+
+--------------------------------------------------------
+
+
+
+
+---------------------------------
+stash
+---------------------------------
+
+git stash save
+현재 작업을 저장해두고 branch를 head로 돌린다.(git reset –hard)
+
+git stash list
+저장되어 있는 stash들 보기
+
+git stash pop
+stash들은 stack에 저장된다. 따라서 가장 최근에 save한 stash가 현재 branch에 적용된다.
+
+git stash apply
+git stash pop 과 비슷한 명령어지만 stash list에서 삭제하지 않는다는 점이 다르다.
+
+git stash drop
+필요 없는 stash를 삭제
+
+git stash clear
+전체 stash list를 삭제
+
+
+--practice
+git stash save
+git stash list -> 항목 나옴
+git stash pop -> 최근항목 되돌림
+git stash list -> 항목 없음
+git lg --all --> 합쳐진 항목 안보임
+
+
+git stash save
+git stash list -> 항목 나옴
+git stash apply ->최근항목 되돌림
+git stash list -> 항목있음
+git stash drop
+git lg --all --> 합쳐진 항목 안보임
+
+
+
+
+---pracetice 2 
+a.txt, b.txt
+-- hotfix에서 a.txt 수정하고 add 하고 master에서 b.txt 수정하고 
+master 에서 git status 하면 
+$ git st
+On branch master
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   a.txt
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   b.txt
+
+master에서 add 하고 status 하면 
+$ git st
+On branch master
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   a.txt
+        modified:   b.txt
+
+
+
+b.txt commit하면 a.txt, b.txt가 commit 된다. 
+exp가 add 한것도 commit 된다는 것이다. 
+
+따라서 exp 가 commit 할 게 없다.
+
+
+-- practice 3 
+-- restore 관련 
+-- restore file vs restore --staged file
+restore 은 수정한것에 대해서 원복 
+restore --staged 은 add 한것에 대해서 원복
+
+
+-- practice 4 
+-- merge 관련 tool 사용해서 진행한다. 
+같은 파일을 master, exp 가 똑같이 수정했다.
+master에서 git merge 하면 conflict 된다.
+git config --global merge.tool kdiff3
+ 
+
+
+
+--practice 5 
+-- 기본 연습
+
+
+
+
+
