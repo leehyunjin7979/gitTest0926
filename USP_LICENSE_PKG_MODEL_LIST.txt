@@ -1,0 +1,171 @@
+USE [GSIS]
+GO
+/****** Object:  StoredProcedure [dbo].[USP_LICENSE_PKG_MODEL_LIST]    Script Date: 2020-12-24 오후 4:56:54 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[USP_LICENSE_PKG_MODEL_LIST]
+@USER_ID numeric(10, 0), @PROD_GRP_CD varchar(50), @PROD_CD varchar(50), @SONO varchar(50), @MODEL_CD varchar(50), @SKIP int, @PAGESIZE int
+WITH EXEC AS CALLER
+AS
+BEGIN
+    DECLARE @LOCAL_USER_ID				NUMERIC(10, 0)
+    DECLARE @LOCAL_PROD_GRP_CD          VARCHAR(50)
+    DECLARE @LOCAL_PROD_CD              VARCHAR(50)
+    DECLARE @LOCAL_SONO                 VARCHAR(50)
+    DECLARE @LOCAL_MODEL_CD             VARCHAR(50)
+    DECLARE @LOCAL_SKIP                 INT
+    DECLARE @LOCAL_PAGESIZE             INT
+    
+    SET @LOCAL_USER_ID                  = @USER_ID     
+    SET @LOCAL_PROD_GRP_CD              = ISNULL( @PROD_GRP_CD , '' )
+    SET @LOCAL_PROD_CD                  = ISNULL( @PROD_CD, '' )
+    SET @LOCAL_SONO                     = ISNULL( @SONO, '' )
+    SET @LOCAL_MODEL_CD                 = ISNULL( @MODEL_CD, '' )
+    SET @LOCAL_SKIP                     = ISNULL( @SKIP, 0 )
+    SET @LOCAL_PAGESIZE                 = ISNULL( @PAGESIZE, 10 )
+    
+     DECLARE @SELECT_CORP_ID				NUMERIC(10, 0)
+    
+    SELECT
+        @SELECT_CORP_ID = [USER].CORP_ID
+        FROM
+            TB_S_USER [USER] WITH(NOLOCK)
+        WHERE
+                [USER].[USER_ID] = @LOCAL_USER_ID
+            AND [USER].USE_YN = 'Y'
+            AND [USER].DEL_YN = 'N'
+    
+    SELECT 
+        APP_S_W_SERIAL
+        INTO #TMP_HIS
+        FROM 
+            TB_F_SWOPTION_SET_HIS [SWLG] WITH(NOLOCK)
+        WHERE 
+            ISNULL(APP_S_W_SERIAL, '') <> ''
+        GROUP BY
+            APP_S_W_SERIAL
+            
+    SELECT
+        [PACK].PKG_CODE
+        INTO #TMP_PKG
+        FROM
+            TB_RM_MD_LIC_OPT_PACKAGE [PACK] WITH(NOLOCK)
+        WHERE 
+        (
+            @LOCAL_PROD_GRP_CD = 'USS' AND  (
+                LEFT( [PACK].PKG_CODE, 3 ) = 'USO'
+                AND
+                RIGHT( LEFT( [PACK].PKG_CODE, 7 ), 2) IN ( SELECT CODE FROM TB_P_PROD_OPTION_MAP WITH(NOLOCK) WHERE PROD_CD = @LOCAL_PROD_CD OR PROD_CD = 'ALL' )
+            )
+            OR
+            @LOCAL_PROD_GRP_CD = 'DR'  AND  LEFT( [PACK].PKG_CODE, 3 ) = 'DGR'
+        )
+        GROUP BY 
+            [PACK].PKG_CODE
+        --COUNT(*) OVER()	AS total, 
+        
+    SELECT
+        COUNT(*) OVER() AS total,
+        ROW_NUMBER() OVER (ORDER BY regDt DESC) AS rnum,
+        dvceMdlCd,
+        dvceSn,
+        dvceExpln,
+        shipCustId,
+        soNO,
+        doNo,
+        hqShipDt,
+        soItem
+        FROM (
+            SELECT
+               
+                [SHIP].COMPO_BF AS dvceMdlCd,                    
+        		[SHIP].SERIAL_BF AS dvceSn,                        
+        		[SHIP].DVCE_EXPLN AS dvceExpln,                    
+        		[SHIP].SHIP_TO_MES AS shipCustId,                  
+        		[SHIP].SO_NO  AS soNO,                             
+        		[SHIP].DO_NO  AS doNo,  
+                CONVERT(VARCHAR(10), [SHIP].HQ_SHIPMENT, 23) AS hqShipDt,     
+        		[SHIP].SALES_ORDER_ITEM AS soItem,
+                [SHIP].REG_DT AS regDt,
+                'A' AS ord
+                FROM
+                    TB_F_SHIP_CMPT [SHIP] WITH(NOLOCK)
+                 WHERE
+                    [SHIP].COMPO_BF IN (
+                        SELECT PKG_CODE FROM #TMP_PKG
+                    )
+                    AND (
+                        @LOCAL_PROD_GRP_CD =  'USS' AND (CONVERT( VARCHAR, [SHIP].HQ_SHIPMENT, 112 ) >= '20201001' OR [SHIP].IS_SO_EXCP = 'Y')
+                        OR
+                        @LOCAL_PROD_GRP_CD <> 'USS' AND 1=1   
+                    )
+            UNION ALL
+            SELECT
+                MODEL_CD  AS dvceMdlCd, 
+                SN AS dvceSn, 
+                [DESC] AS dvceExpln,
+                SHIP_TO AS shipCustId, 
+                SO AS soNO, 
+                DO AS doNo, 
+                dbo.FN_GET_DT(HQ_SHIPMENT, 'D') AS hqShipDt, 
+                '' AS soItem,
+                REG_DT AS regDt,
+                'B' AS ord
+                FROM
+                    TB_O_SHIP_SW WITH(NOLOCK)
+                WHERE
+                    MODEL_CD IN (
+                        SELECT PKG_CODE FROM #TMP_PKG
+                    )
+        ) SHIP
+        LEFT OUTER JOIN
+            TB_O_SO_EXCEP [EXCEP] WITH(NOLOCK) ON
+                    [EXCEP].USE_YN = 'Y'
+                AND [EXCEP].SO = SHIP.soNO
+                AND [EXCEP].MDL_CD = SHIP.dvceMdlCd
+                AND [EXCEP].ITEM_NO = CONVERT(INT, SHIP.soItem)
+        WHERE
+            (
+                @SELECT_CORP_ID =  2 AND 1=1
+                OR
+                @SELECT_CORP_ID <> 2  AND dbo.FN_COM_7_CONVERT_4_ERP_CD(shipCustId) IN 
+                (
+		            SELECT 
+                        dbo.FN_COM_7_CONVERT_4_ERP_CD(ERP_CD) 
+                        FROM 
+                            dbo.FN_COM_DESC_CORP_BY_USER_ID_AND_LOGIC(@LOCAL_USER_ID, 'Y', 'Y')
+		        )
+            )
+            AND [EXCEP].EXCEP_ID IS NULL
+            AND dvceSn NOT IN (
+                SELECT APP_S_W_SERIAL FROM #TMP_HIS
+            )
+            
+            
+          
+            AND (
+                @LOCAL_SONO =  '' AND 1=1
+                OR
+                @LOCAL_SONO <> '' AND soNO LIKE '%' + @LOCAL_SONO + '%'
+            )
+            AND 
+            (
+                @LOCAL_MODEL_CD =  '' AND 1=1
+                OR
+                @LOCAL_MODEL_CD <> '' AND dvceMdlCd LIKE '%' +  @LOCAL_MODEL_CD + '%'
+            )
+            
+            
+            
+        ORDER BY
+            ord ASC, dvceMdlCd ASC, shipCustId ASC, soNO DESC
+        OFFSET @LOCAL_SKIP ROWS FETCH NEXT @LOCAL_PAGESIZE ROWS ONLY
+            
+        
+        
+    DROP TABLE #TMP_PKG  
+    DROP TABLE #TMP_HIS
+            
+END
