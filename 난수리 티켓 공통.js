@@ -205,10 +205,7 @@ var hrTicketCommon = {
                         }
                 }
                 $.ajax($.extend(true, {}, defaults, options));
-            },	
-            
-            
-
+            },
             hrTicketCommon.makeHrTicketGrid(_target, _params, _columns, function(e){$("#search_btn").trigger("click");});
             
             
@@ -242,10 +239,8 @@ var hrTicketCommon = {
             allowUnsort: true,
             showIndexes: true
         },
-
         pageSize		: 10
     });
-
 
     $("#" + _target).kendoGrid({
         dataSource 	: _dataSource,

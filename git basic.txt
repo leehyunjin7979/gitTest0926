@@ -1,3 +1,5 @@
+
+
 /////////////git basic /////////////
 /////////////git basic /////////////
 alias.ll=log --pretty=format:%C(yellow)%h%Cred%d\ %Creset%s%Cblue\ [%cn] --decorate --numstat
@@ -365,7 +367,7 @@ exp가 add 한것도 commit 된다는 것이다.
 -- practice 3 
 -- restore 관련 
 -- restore file vs restore --staged file
-restore 은 수정한것에 대해서 원복 
+restore 은 수정한것에 대해서 원복 ( add가 된 상태라면 git restore --staged 해서 unstaged 상태로 만들고 git restore 하면 수정한게 원복된다)
 restore --staged 은 add 한것에 대해서 원복
 
 
@@ -380,8 +382,31 @@ git config --global merge.tool kdiff3
 
 --practice 5 
 -- 기본 연습
+-- master 에서 여러건의 수정사항이 있다. 
+-- hotfix 브랜치를 만들고 우선 반영해야할 것을 add 하고 commit 한다.
+-- a.txt, b.txt 수정이 되었다. 
+이중 hotfix 로 c.txt add, commit 한다.
+그리고 master 에서 확인한다.
+a.txt는 수정된상태이고 b.txt는 수정이 안된 상태.
+
+git st하면 
+$ git st
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   a.txt 이다.
 
 
 
+
+-- git comment 수정하기 
+git commit --amend -m "33"
+
+
+$ git rebase -i HEAD~3
+edit 0a8829b 1
+$ git commit --amend 
+$ git rebase --continue
 
 
