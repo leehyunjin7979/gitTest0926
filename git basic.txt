@@ -285,6 +285,30 @@ git diff --theirs -b
 git diff --base -b 
 
 
+-- 과거 커밋으로 가서 수정하기
+
+git checkout 1111
+git switch -c newbranch
+source edit
+git add .
+git commit 
+git checkout master
+git merge newbranch
+
+
+--merge
+git config --global merge.tool kdiff3
+git mergetool
+
+HyunjinLEE@MEDIS-20190904Q MINGW64 ~/Documents/gitTest (hot)
+$ git lg --all
+*   7cb6801 - (12 seconds ago) b file comflict - lhj (HEAD -> hot)
+|\
+| * fc454d1 - (11 minutes ago) b.file 2-> 2_2 - lhj (hot2)
+* | d831e90 - (13 minutes ago) b file add 3 - lhj
+|/
+* a3e722a - (20 minutes ago) a, b file 1-> 2 - lhj
+* d1cab0a - (21 minutes ago) init - lhj (master)
 
 
 --------------------------------------------------------
@@ -306,7 +330,7 @@ git stash pop
 stash들은 stack에 저장된다. 따라서 가장 최근에 save한 stash가 현재 branch에 적용된다.
 
 git stash apply
-git stash pop 과 비슷한 명령어지만 stash list에서 삭제하지 않는다는 점이 다르다.
+	git stash pop 과 비슷한 명령어지만 stash list에서 삭제하지 않는다는 점이 다르다.
 
 git stash drop
 필요 없는 stash를 삭제
@@ -410,3 +434,4 @@ $ git commit --amend
 $ git rebase --continue
 
 
+--
