@@ -103,5 +103,80 @@ $("#popup_quick_search .btn_pop_close").click(function() {
 
 
 
+-----------softwareList.js
+setDropDown($("#popProdGrpCd"),software.dropdownInit.prodGrpList,software.dropdownInit.prodOps("prodGrpCd"));
+
+dropdownInit : {
+			/** kendo dropdown 초기화 **/
+			attrList    : getCommonJsonList("/common/getComCodeAjax.do",{"codeGroupId":"F014"}),
+			importance  : getCommonJsonList("/common/getComCodeAjax.do",{"codeGroupId":"F011"}),
+            techType    : getCommonJsonList("/common/getComCodeAjax.do",{"codeGroupId":"F010"}),
+            comCodeOps  : {dataTextField:"codeNm",dataValueField:"codeId"},
+            prodList    : getProdInfo("prodCd"),
+            prodGrpList : getProdInfo("prodGrpCd"),
+            prodOps     : function(division){
+            	if(division == "prodCd"){
+            		return {dataTextField:"prodNm",dataValueField:"prodCd"}
+            	}else{
+            		return {dataTextField:"prodGrpNm",dataValueField:"prodGrpCd"}
+            	}
+            }
+}	
+
+/**
+ * 제품군, 제품 정보 가져와 데이터 리턴.
+ * @param division
+ */
+function getProdInfo(division, prodGrpCd){
+	var params = {"division":division};
+	if(prodGrpCd != "" && prodGrpCd != undefined && prodGrpCd != null){
+		params["prodGrpCd"] = prodGrpCd;
+	}
+	var arr = new Array();
+	$.ajax({
+		url : "/field/fild/searchProdInfo.do",
+		type: "POST",
+		data: JSON.parse(JSON.stringify(params)),
+		async:false,
+		success : function(r){
+			arr = r.list;
+		},
+		error : function(){
+			var msg = (division == "prodCd" ? $.gsisMsg("FS-02-03-003.2"):$.gsisMsg("FS-02-03-003.1")) + $.gsisMsg("FS-02-03-003.41");
+			fieldUtil.alert(msg);
+		}
+	});
+	return arr;
+}
 
 
+/**
+ * Kendo UI Drop Down
+ * @param el	      : kendoDropDown 적용시킬 Element
+ * @param codeGroupId : dropdown <option> text, value
+ * @param ops         : el.kendoComboBox() option
+ * @param isNotBlank  : 첫 <option>이 빈 데이터인지 여부
+ * 						-> true일 경우 공백 없이 세팅
+ */
+function setDropDown(el, item, ops, isNotBlank){
+	var arr = new Array();
+
+	var defaultOps = {
+						dataTextField: "text",
+						dataValueField: "value",
+						dataSource: [],
+						index: 0
+					};
+	var options = $.extend(true,{}, defaultOps, ops);
+	if(isNotBlank){
+		arr = item;
+	}else{
+		var tmp = {};
+		tmp[options.dataTextField] = "";
+		tmp[options.dataValueField] = "";
+		arr = $.merge([tmp],item);
+	}
+	options.dataSource = arr;
+	$(el).kendoComboBox(options);
+	$(el).data("kendoComboBox").input.attr("readOnly",true);
+}
