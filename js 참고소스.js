@@ -180,3 +180,15 @@ function setDropDown(el, item, ops, isNotBlank){
 	$(el).kendoComboBox(options);
 	$(el).data("kendoComboBox").input.attr("readOnly",true);
 }
+
+selectAttachFileUpdateInfo ->
+
+
+<select id="selectCommonAttachFileInfo" parameterType="com.samsunghealthcare.gsis.common.service.AttachFileVO" resultType="com.samsunghealthcare.gsis.common.service.AttachFileVO">
+		/* com.samsunghealthcare.gsis.common.service.impl.CommonFileMapper.selectCommonAttachFileInfo */
+		impl
+			AttachFileVO vo = new AttachFileVO();
+			vo.setFileNo(Integer.parseInt(fileNo));
+			List<AttachFileVO> list = commonFileMapper.selectCommonAttachFileInfo(vo);
+
+			

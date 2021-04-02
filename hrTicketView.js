@@ -174,7 +174,8 @@ var hrTicketView = {
 //		    });
 
 
-			$("#transBtn").bind("click", function(){
+			$("#transBtn").bind("click", function(){ // 직파트너가 아닌 경우  if($("#htPartnerYn").val() == "Y"){ $("#transBtn").hide();}
+			// 
 				hrTicketView.HQtransfer(); //HQ로 이관하는것 .setAutoYn:Y, setOwnerId:0, setL3TransferYn:Y 으로 변경
 				//Ticket has been transfered to HQ.
 			});
@@ -433,11 +434,8 @@ var hrTicketView = {
 		setInitDefault : function() {
 
 			//시장품질 이관 버튼
-			$("#l4_transfer_btn").bind("click", function(e){
-				//$("#l4transfer_btn").trigger("click");
+			$("#l4_transfer_btn").bind("click", function(e){				
 				hrTicketView.transPopup();
-				//hrTicketView.transfer();
-
 				$("#dialog_l4transfer").append("<div id='dialog_l4transfer2'></div>");
 				$("#dialog_l4transfer2").gsisLoadWindow({
 					width : 1200,
@@ -1227,6 +1225,7 @@ var hrTicketView = {
 
 				$("#cc_list").append($li);
 			});
+
 			$.each(_ccList, function(i, item){
 				var $li = $('<li>');
 				var $userTxt = null;
@@ -1270,7 +1269,6 @@ var hrTicketView = {
 			var _target = "ticket_memo_list";
 			var _url = "/tech/hrts/hrTicketMemoListAjax.do";
 			var _params = {hdTicketNo : _hdTicketNo, reqUserId : hrTicketCommon._PARAM.reqUserId , ownerId : hrTicketCommon._PARAM.ownerId};
-
 			techCommon.ajax(_url, 'json', _params, hrTicketViewCallback.memoList);
 		},
 
