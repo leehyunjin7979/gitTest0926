@@ -1,0 +1,455 @@
+openapi: 3.0.2
+info:
+  title: E-FOTA 2.0
+  description: E-FOTA API Spec for Client
+  version: '1.0.1'
+servers:
+  - url: 'https://localhost:8080/dfm/device/v1'
+  - url: 'https://sota.samsungremoteservice.com/dfm/device/v1'
+    description: E-FOTA v2
+tags:
+  - name: Devices
+paths:
+
+  /devices/register:
+    post:
+      tags:
+        - Devices
+      summary: Register a device
+      description: Get Device List
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                imei:
+                  type: string
+                  description: "iemi value of the device"
+                  example: "123456789012345"
+                meid:
+                  type: string
+                  description: "meid value of the device"
+                  example: "43210987654321"
+                serialNumber:
+                  type: string
+                  description: serial number
+                  example: CV3003403FF19CF
+                model:
+                  type: string
+                  description: model name
+                  example: SGH-ZNNN
+                salesCode:
+                  type: string
+                  description: sales code
+                  example: DBT
+                firmwareVersion:
+                  type: string
+                  description: Firmware Version
+                  example:  I9300XXDLIH/I9300DBTDLI2/I9300XXDLID
+                rooted:
+                  type: boolean
+                  description: Checks whether the device is rooted
+                  example: false
+                agentInfo:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Agent name
+                      example: E-FOTA Agent
+                    version:
+                      type: string
+                      description: Agent Version
+                      example: 1.2.1
+                    platform:
+                      type: string
+                      description: Platform
+                      example: Android
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deviceId:
+                    type: string
+                    format: case sensitive alphanumeric
+                    description: Device ID
+                    maxLength: 20
+                    example: xlksf923lksfjlsf
+        '400':
+          description: Invalid status value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultCode:
+                    type: string
+                    description: result code
+                    example: ZSF0001
+                  resultMessage:
+                    type: string
+                    description: result message
+                    example: Error
+          
+  /devices/{deviceId}/unregister:
+    post:
+      tags:
+        - Devices
+      summary: Unregister a device
+      description: Unregister a device
+      parameters:
+        - $ref: '#/components/parameters/deviceId'
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          description: Invalid status value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultCode:
+                    type: string
+                    description: result code
+                    example: ZSF0001
+                  resultMessage:
+                    type: string
+                    description: result message
+                    example: Error
+
+  /devices/{deviceId}:
+    patch:
+      tags:
+        - Devices
+      summary: update device info
+      description: Client should call this API when...
+
+       - Firmware Update is completed.
+
+       - Sales code of the device is changed.
+
+       - Requested action by "check action API" is "SyncDevice"
+      parameters:
+        - $ref: '#/components/parameters/deviceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  description: model name
+                  example: SGH-ZNNN
+                salesCode:
+                  type: string
+                  description: sales code
+                  example: XEF
+                firmwareVersion:
+                  type: string
+                  description: Firmware Version
+                  example:  I9300XXDLIH/I9300DBTDLI2/I9300XXDLID
+                rooted:
+                  type: boolean
+                  description: Checks whether the device is rooted
+                  example: false
+                agentInfo:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Agent name
+                      example: E-FOTA Agent
+                    version:
+                      type: string
+                      description: Agent Version
+                      example: 1.2.1
+                    platform:
+                      type: string
+                      description: Platform
+                      example: Android
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          description: Invalid status value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultCode:
+                    type: string
+                    description: result code
+                    example: ZSF0001
+                  resultMessage:
+                    type: string
+                    description: result message
+                    example: Error
+
+  /devices/{deviceId}/checkAction:
+    post:
+      tags:
+        - Devices
+      summary: Check next action
+      description: Check next action to be executed.
+
+
+                If deviceId is not allocated yet, omit deviceId on path parameter.  ex) /devices/checkAction
+
+
+                Response column 'updatePolicy' and 'firmwareToBeUpdated' is shown only when next action is either 'Download' or 'Install'.
+      parameters:
+        - $ref: '#/components/parameters/deviceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  description: model name
+                  example: SGH-ZNNN
+                salesCode:
+                  type: string
+                  description: sales code
+                  example: DBT
+                firmwareVersion:
+                  type: string
+                  description: Firmware Version
+                  example:  I9300XXDLIH/I9300DBTDLI2/I9300XXDLID
+                deviceDateTime:
+                  type: string
+                  description: current datetime of device. (OffsetDateTime offsetDateTime = OffsetDateTime.now(); offsetDateTime.toString();)
+                  format: ISO 8601 format
+                  example: '2019-09-25T20:27:32.949+09:00'
+                toFirmwareDownloaded:
+                  type: boolean
+                  description: next firmware downloaded or not
+                toFirmwareScenarioId:
+                  type: string
+                  description: next firmware scenario Id.
+                  example: FW-2019-01-1123
+                rooted:
+                  type: boolean
+                  description: Checks whether the device is rooted
+                  example: false
+                agentInfo:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Agent name
+                      example: E-FOTA Agent
+                    version:
+                      type: string
+                      description: Agent Version
+                      example: 1.2.1
+                    platform:
+                      type: string
+                      description: Platform
+                      example: Android
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  action:
+                    type: string
+                    description: action to be executed in device.
+                    enum:
+                      - Register
+                      - Unregister
+                      - Download
+                      - Install
+                      - UpdateAgent
+                      - None
+                      - SyncDevice
+                  nextPollingInterval:
+                    type: number
+                    description: Polling Interval. (unit:seconds)
+                    example: 86400
+                  toFirmwareInfo:
+                    type: object
+                    description: nextAction=Download, Install 인 경우만 존재하며, Update할 Firmware의 정보다.
+                    properties:
+                      firmwareScenarioId:
+                        type: string
+                        description: ID of firmware scenario.
+                        example: FW-2019-01-1123
+                      firmwareVersion:
+                        type: string
+                        description: To firmware version
+                        example:  I9300XXDLIH/I9300DBTDLI2/I9300XXDLIE
+                      downloadUrl:
+                        type: string
+                        description: download url
+                        example: http://zb2secak-fota-dn.samsungdm.com/firmware/TMB/SM-G955U/ccd6483e7ccb4fddaf6cb7ceffd74256.bin?px-wid=randomWorkId&px-wctime=randomWorkId&px-unum=&__gda__=1568375768_22e57a8ed64967d8cc966a7a6dde8fdb
+                      size:
+                        type: number
+                        description: size of delta binary (long)
+                        example: 326148580
+                      md5Checksum:
+                        type: string
+                        description: The MD5 Checksum of delta binary
+                        example: dfbb5ff85f96d1108262aa5667f3f522
+                  policy:
+                    type: object
+                    description: In case of 'nextAction=Download or Install', this item exists.
+                    properties:
+                      downloadNetworkType:
+                        type: string
+                        description: >-
+                          allowed download type * wifiOnly - Download in WIFI only * both -
+                          Downalod in WIFI or Cellular network
+                        enum:
+                          - wifiOnly
+                          - both
+                        example: wifiOnly
+                      downloadRoaming:
+                        type: boolean
+                        description: allow mobile data while dataRoaming
+                        default: false
+                      downloadMaxBandwidth:
+                        type: number
+                        description: 'Max bandwidth, 0 - Unlimited'
+                        default: 0
+                        example: 0
+                      installPostponeCount:
+                        type: number
+                        description: Whether it can be postponed.
+                        default: true
+                      installPowerCable:
+                        type: boolean
+                        description: Update while plugged in only. (Connect the power supply)
+                        default: false
+                      installMinBatteryLevel:
+                        type: number
+                        description: minimum battery level to update firmware
+                        default: 30
+                        example: 30
+                  toAgentInfo:
+                    type: object
+                    description: the agent information to be UpdateDevice. This value exists if 'action=UpdateAgent'.
+                    properties:
+                      name:
+                        type: string
+                        description: agent name
+                        example: FW-2019-01-1123
+                      version:
+                        type: string
+                        description: version of agent
+                        example:  1.2.3
+                      platform:
+                        type: string
+                        description: platform type
+                        example: Android
+                      downloadUrl:
+                        type: string
+                        description: download url
+                        example: http://zb2secak-fota-dn.samsungdm.com/firmware/TMB/SM-G955U/ccd6483e7ccb4fddaf6cb7ceffd74256.bin?px-wid=randomWorkId&px-wctime=randomWorkId&px-unum=&__gda__=1568375768_22e57a8ed64967d8cc966a7a6dde8fdb
+                      size:
+                        type: number
+                        description: size of delta binary (long)
+                        example: 32614580
+                      md5Checksum:
+                        type: string
+                        description: The MD5 Checksum of delta binary
+                        example: dfbb5ff85f96d1108262aa5667f3f522
+        '400':
+          description: Invalid status value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultCode:
+                    type: string
+                    description: result code
+                    example: ZSF0001
+                  resultMessage:
+                    type: string
+                    description: result message
+                    example: Error
+  /devices/{deviceId}/updateProgress:
+    post:
+      tags:
+        - Devices
+      summary: Update work progress
+      description: Reports a new event of the devices.
+      parameters:
+        - $ref: '#/components/parameters/deviceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                progressCode:
+                  type: string
+                  description: progress code
+                  example: "599"
+                progressMessage:
+                  type: string
+                  description: detail of the progressCode
+                  example: Download Complete
+                toFirmwareScenarioId:
+                  type: string
+                  description: firmware Scenario Id in progress.
+                  example: FW-20200129-12312
+                eventOccuredDateTime:
+                  type: string
+                  description: The datetime when the event occured in the device.
+                  format: ISO 8601 format
+                  example: '2019-09-25T20:27:32.949+09:00'
+                deviceDateTime:
+                  type: string
+                  description: current datetime of device. (OffsetDateTime offsetDateTime = OffsetDateTime.now(); offsetDateTime.toString();)
+                  format: ISO 8601 format
+                  example: '2019-09-25T20:27:32.949+09:00'
+               
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          description: Invalid status value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultCode:
+                    type: string
+                    description: result code
+                    example: ZSF0001
+                  resultMessage:
+                    type: string
+                    description: result message
+                    example: Error
+
+components:
+  parameters:
+    deviceId:
+      in: path
+      name: deviceId
+      required: true
+      description: Device ID
+      schema:
+        type: string
+        format: case sensitive alphanumeric
+        maxLength: 20
+        example: xlksf923lksfjlsf
